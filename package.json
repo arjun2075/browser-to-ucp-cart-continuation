@@ -1,0 +1,17 @@
+{
+  "name": "browser-to-ucp-continuation",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Reference prototype for Browser-to-UCP Cart Continuation requirements v0.3",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
