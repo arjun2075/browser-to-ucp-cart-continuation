@@ -84,15 +84,20 @@ enforceable security property.** v0.3 lists case 14 as "a requirements target,
 not a claim that current WebMCP supplies the needed primitive." No XSS-resistance
 claim is made or supported.
 
-**It does not implement Platform authentication and does not satisfy R10.**
-`SimulatedPlatformBinding` / `authenticatedPlatformProfile` carry a string the
-merchant compares for equality. **String equality against a self-asserted profile
-identifier does not satisfy R10** ("Verifiable Platform binding… a self-asserted
-Platform profile URI alone is insufficient"). Actual UCP/A2A Platform-profile
-binding is unresolved: per v0.3 §5, A2A authenticates a *client principal* and
-`UCP-Agent` advertises a *claimed profile URI*, and the cryptographic mapping
-between those two identities is undefined for this use case. The naming is
-deliberate so the seam cannot be mistaken for production authentication.
+**It does not implement Platform authentication and therefore does not itself
+demonstrate R10.** `SimulatedPlatformBinding` /
+`authenticatedPlatformProfile` carry a string the merchant compares for equality.
+**String equality against a self-asserted profile identifier is not Platform
+authentication.** For REST and MCP over streamable HTTP, however, existing UCP
+HTTP Message Signatures provide the required Platform-profile binding: the signed
+`UCP-Agent` header identifies the Platform profile and the signature's `keyid`
+resolves against that profile's published `keys[]`. A production redemption can
+therefore record the intended profile at issuance and require redemption by a
+signed UCP request whose verified profile matches it. The remaining
+transport-specific open question is A2A, where the mapping between the
+authenticated A2A client principal and the claimed UCP Platform profile is not
+defined here. The simulated naming remains deliberate so the prototype seam
+cannot be mistaken for production authentication.
 
 **It does not settle the commerce/private-data boundary.** `DemoDisclosurePolicy`
 is the prototype's own illustrative split, **not a claimed UCP rule**. v0.3
