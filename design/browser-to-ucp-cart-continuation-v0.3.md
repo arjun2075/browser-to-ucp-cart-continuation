@@ -87,11 +87,26 @@ The exact browser primitive needed for that integrity binding is an open **cross
 
 No XSS-resistance claim should be made unless such a privileged binding actually exists.
 
-## 5. Platform identity and A2A
+## 5. Platform identity across transports
 
 Platform binding and buyer identity are separate concerns.
 
 UCP profiles serve both capability negotiation and identity/key publication, and UCP supports established authentication mechanisms rather than requiring a continuation-specific identity system.
+
+### REST and MCP over streamable HTTP
+
+For REST and MCP over streamable HTTP, existing UCP HTTP Message Signatures can
+satisfy R10 without a continuation-specific identity mechanism. The request carries
+`UCP-Agent: profile="..."`; that header is covered by the RFC 9421 signature, and
+the signature's `keyid` resolves against the `keys[]` published by that profile.
+
+A Platform-bound continuation can therefore record the intended profile URL at
+issuance and require redemption through a signed UCP request whose verified
+profile URL is the same one. The profile value supplied at issuance identifies
+the permitted redeemer; cryptographic proof occurs at redemption.
+
+This document does not introduce another signature or proof mechanism for those
+transports.
 
 ### A2A specifically
 
@@ -204,7 +219,7 @@ This is a data-consistency requirement, not an agent-reasoning conformance requi
 | 8  | Buyer/account-private field lacks independent authorization           | Field is omitted/redacted                                                                                                                     |
 | 9  | Cart continuation presented as buyer authentication                   | Does not establish buyer identity                                                                                                             |
 | 10 | Cart continuation presented as payment/order authority                | Does not authorize the action                                                                                                                 |
-| 11 | REST and MCP implementations                                          | Same cart-continuation semantics despite transport-specific mechanics                                                                         |
+| 11 | REST and MCP implementations                                          | Same cart-continuation semantics; any Platform restriction is enforced by a signed UCP request whose verified `UCP-Agent` profile matches the profile recorded at issuance |
 | 12 | A2A implementation                                                    | A2A client authentication is honored; any claimed Platform binding additionally demonstrates a verifiable mapping to the UCP Platform profile |
 | 13 | Self-asserted Platform URI with no verifiable binding                 | Insufficient where the continuation claims Platform restriction                                                                               |
 | 14 | Page JavaScript substitutes agent challenge material                  | A future browser-integrity mechanism must make the substitution detectable or impossible                                                      |
@@ -226,7 +241,7 @@ Current prototype status:
 * the prototype does **not** solve privileged browser issuance;
 * commerce/private-field classification in the prototype is illustrative only.
 
-The prototype demonstrates selected state-machine and concurrency properties. It does **not** demonstrate standards compliance, WebMCP security, cross-transport Platform authentication, or a production-ready continuation design.
+The prototype demonstrates selected state-machine and concurrency properties. It does **not** demonstrate standards compliance, WebMCP security, production REST/MCP signature verification, A2A Platform-profile binding, or a production-ready continuation design.
 
 ## 12. Non-normative capability sketch
 
@@ -244,11 +259,14 @@ This is only a discussion placeholder. v0.3 does not assert that a separate capa
 
 Current WebMCP supplies a browser-agent model and browser-mediated tool invocation, but the required end-to-end issuance binding is not currently defined.
 
-### B. Platform binding
+### B. A2A Platform binding
 
-**Which existing UCP/A2A authentication mechanisms should establish that the authenticated external client actually corresponds to the claimed UCP Platform profile across supported transports?**
+**For A2A redemption, how should the authenticated A2A client principal be verifiably related to the claimed UCP Platform profile?**
 
-This should first attempt to reuse existing UCP and A2A authentication rather than creating a new proof protocol.
+REST and MCP over streamable HTTP already have a UCP-native answer through signed
+`UCP-Agent` requests and profile-published keys. The remaining question is
+therefore A2A-specific and should reuse existing A2A/UCP authentication machinery
+rather than creating a continuation-specific proof protocol.
 
 ### C. Commerce/private-data boundary
 
@@ -282,4 +300,4 @@ Before defining a wire protocol, maintainers should decide three things:
 
 1. whether a new continuation primitive is actually necessary versus direct/eager cart approaches;
 2. what browser primitive can securely bind agent-originated handoff material to merchant issuance; and
-3. how Platform identity and permissible cart-data disclosure are verified across transports.
+3. how A2A Platform-profile binding and permissible cart-data disclosure are verified.
